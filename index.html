@@ -20,12 +20,12 @@
     
     @page {
       size: A4 portrait;
-      margin: 0;
+      margin: 0 !important;
     }
     @media print {
       html, body {
-        width: 794px !important;
-        height: 1120px !important;
+        width: 100% !important;
+        height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
@@ -43,8 +43,10 @@
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
-        width: 794px !important;
+        width: 100% !important;
         display: block !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
     }
   </style>
@@ -1070,8 +1072,7 @@
       const modoCompacto = (qtdSab >= 5 && qtdQua >= 5) || (qtdSab + qtdDom + qtdQua >= 14);
 
       let html = `
-        <div style="width: 794px; min-height: 1120px; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; color: #1b1b1b; padding-left: 32px; padding-right: 32px; padding-top: ${URL_TOPO_IMG ? (modoCompacto ? '118px' : '124px') : '25px'}; padding-bottom: ${URL_RODAPE_IMG ? (modoCompacto ? '98px' : '110px') : '25px'}; background: #ffffff;">
-          
+          <div style="width: 794px; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; color: #1b1b1b; padding-left: 32px; padding-right: 32px; padding-top: ${URL_TOPO_IMG ? (modoCompacto ? '114px' : '120px') : '20px'}; padding-bottom: ${URL_RODAPE_IMG ? (modoCompacto ? '94px' : '104px') : '20px'}; background: #ffffff; page-break-inside: avoid; break-inside: avoid;">
           ${URL_TOPO_IMG ? `
             <div style="position: fixed; left: 0; top: 0; width: 100%; height: 110px; z-index: 100;">
               <img src="${URL_TOPO_IMG}" style="width: 100%; height: 100%; display: block; object-fit: cover;" />
