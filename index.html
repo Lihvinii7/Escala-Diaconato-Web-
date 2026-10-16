@@ -16,6 +16,7 @@
     .text-primaria { color: #0b4f7b; }
     .tab-ativa { border-bottom: 3px solid #0b4f7b; color: #0b4f7b; font-weight: bold; }
     
+    
 @page {
   size: A4 portrait;
   margin: 0;
@@ -89,14 +90,11 @@
     page-break-inside: avoid !important;
   }
 
-  /* Safari do iPhone: trava em folha única real sem criar página 2 */
+  /* Safari do iPhone: evita que position:fixed desloque as imagens do cabeçalho e rodapé */
   html.ios-pdf #areaImpressaoPdf > div {
     position: relative !important;
-    zoom: 0.94 !important;
-    padding-bottom: 95px !important;
   }
 
-  /* Cabeçalho no topo da folha */
   html.ios-pdf #areaImpressaoPdf > div > div:nth-child(1) {
     position: absolute !important;
     left: 0 !important;
@@ -107,20 +105,21 @@
     z-index: 100 !important;
   }
 
-  /* Rodapé colado na base da folha sem empurrar para página 2 */
+  /* No Safari, o rodapé entra no fluxo do documento para não ser empurrado para uma segunda página. */
   html.ios-pdf #areaImpressaoPdf > div > div:last-child {
-    position: absolute !important;
-    left: 0 !important;
+    position: static !important;
+    left: auto !important;
     top: auto !important;
-    bottom: 0 !important;
-    width: 210mm !important;
+    bottom: auto !important;
+    width: 100% !important;
     height: 90px !important;
-    margin: 0 !important;
+    margin-top: 42px !important;
     z-index: 100 !important;
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
 }
+
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
@@ -410,7 +409,7 @@
     const URL_TOPO_IMG = "https://kmpczpeltybcyaidmbsy.supabase.co/storage/v1/object/public/escalas-assets/topo.jpeg";
     const URL_RODAPE_IMG = "https://kmpczpeltybcyaidmbsy.supabase.co/storage/v1/object/public/escalas-assets/rodape.jpeg";
 
-    // SENHA DO PAINEL
+    // SENHA DO PAINEL (Altere aqui se desejar)
     const SENHA_ADMIN = "iasd2026";
     let isAdmin = sessionStorage.getItem('isAdminLogged') === 'true';
 
@@ -1131,7 +1130,7 @@
       }
     }
 
-    // GERADOR DO PDF OFICIAL
+    // GERADOR DO PDF OFICIAL (DISTRIBUIÇÃO HARMONIOSA A4)
     function gerarPdfOficial() {
       const mesNome = MESES[mesSelecionado - 1];
       const anoNome = anoSelecionado;
@@ -1263,29 +1262,38 @@
       area.classList.remove('hidden');
 
       const ehCelular =
-        /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-      if (ehCelular) {
-        document.documentElement.classList.add('mobile-pdf');
-      }
+if (ehCelular) {
+  document.documentElement.classList.add('mobile-pdf');
+}
 
-      const ehIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const ehIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-      if (ehIOS) {
-        document.documentElement.classList.add('ios-pdf');
-      }
+if (ehIOS) {
+  document.documentElement.classList.add('ios-pdf');
 
-      setTimeout(() => {
-        window.print();
-      }, 500);
+  // Move o rodapé para depois das tabelas no Safari, evitando que o posicionamento
+  // absoluto/fixo faça a imagem aparecer em uma segunda página.
+  const paginaPdf = area.firstElementChild;
+  if (paginaPdf) {
+    const rodapePdf = paginaPdf.children[1];
+    if (rodapePdf) paginaPdf.appendChild(rodapePdf);
+  }
+}
 
-      window.addEventListener('afterprint', function restaurarArea() {
-        area.classList.add('hidden');
-        document.documentElement.classList.remove('mobile-pdf', 'ios-pdf');
-        window.removeEventListener('afterprint', restaurarArea);
-      });
+setTimeout(() => {
+  window.print();
+}, 500);
+
+window.addEventListener('afterprint', function restaurarArea() {
+  area.classList.add('hidden');
+  document.documentElement.classList.remove('mobile-pdf', 'ios-pdf');
+
+  window.removeEventListener('afterprint', restaurarArea);
+});
     }
   </script>
 </body>
