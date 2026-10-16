@@ -90,54 +90,9 @@
     page-break-inside: avoid !important;
   }
 
-  /* Safari iOS: retirar a interface normal do fluxo de impressão.
-     Ela ficava invisível, mas continuava ocupando espaço e gerando a folha 2. */
-  html.ios-pdf body > *:not(#areaImpressaoPdf) {
-    display: none !important;
-  }
-
-  html.ios-pdf,
-  html.ios-pdf body {
-    width: 210mm !important;
-    height: 297mm !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    max-width: 210mm !important;
-    max-height: 297mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-  }
-
-  html.ios-pdf #areaImpressaoPdf {
-    position: fixed !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 210mm !important;
-    height: 296mm !important;
-    min-height: 0 !important;
-    max-height: 296mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-    break-after: avoid !important;
-    page-break-after: avoid !important;
-  }
-
+  /* Safari do iPhone: evita que position:fixed desloque as imagens do cabeçalho e rodapé */
   html.ios-pdf #areaImpressaoPdf > div {
     position: relative !important;
-    width: 210mm !important;
-    height: 296mm !important;
-    min-height: 0 !important;
-    max-height: 296mm !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    break-after: avoid !important;
-    page-break-after: avoid !important;
   }
 
   html.ios-pdf #areaImpressaoPdf > div > div:nth-child(1) {
@@ -150,6 +105,7 @@
     z-index: 100 !important;
   }
 
+  /* Safari iPhone: o rodapé continua como segundo elemento e fica preso à base da folha. */
   html.ios-pdf #areaImpressaoPdf > div > div:nth-child(2) {
     position: absolute !important;
     left: 0 !important;
@@ -159,6 +115,8 @@
     height: 90px !important;
     margin: 0 !important;
     z-index: 100 !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 }
 
@@ -1315,9 +1273,8 @@ const ehIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 if (ehIOS) {
-  // Cabeçalho e rodapé permanecem nos seus lugares originais;
-  // o CSS de impressão posiciona ambos dentro da mesma folha A4.
   document.documentElement.classList.add('ios-pdf');
+
 }
 
 setTimeout(() => {
