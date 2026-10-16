@@ -95,28 +95,39 @@
     position: relative !important;
   }
 
+  /* Safari iOS: sangria total das faixas e posicionamento dentro da folha A4 */
   html.ios-pdf #areaImpressaoPdf > div > div:nth-child(1) {
     position: absolute !important;
-    left: 0 !important;
+    left: -32px !important;
     top: 0 !important;
     bottom: auto !important;
-    width: 210mm !important;
+    width: calc(100% + 64px) !important;
     height: 110px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     z-index: 100 !important;
   }
 
-  /* No Safari, o rodapé entra no fluxo do documento para não ser empurrado para uma segunda página. */
   html.ios-pdf #areaImpressaoPdf > div > div:last-child {
-    position: static !important;
-    left: auto !important;
+    position: absolute !important;
+    left: -32px !important;
     top: auto !important;
-    bottom: auto !important;
-    width: 100% !important;
+    bottom: 0 !important;
+    width: calc(100% + 64px) !important;
     height: 90px !important;
-    margin-top: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     z-index: 100 !important;
     break-inside: avoid !important;
     page-break-inside: avoid !important;
+  }
+
+  html.ios-pdf #areaImpressaoPdf > div > div:nth-child(1) img,
+  html.ios-pdf #areaImpressaoPdf > div > div:last-child img {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    object-fit: fill !important;
   }
 }
 
