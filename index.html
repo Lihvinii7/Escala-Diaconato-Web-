@@ -16,55 +16,67 @@
     .text-primaria { color: #0b4f7b; }
     .tab-ativa { border-bottom: 3px solid #0b4f7b; color: #0b4f7b; font-weight: bold; }
     
-    @page {
-      size: A4 portrait;
-      margin: 0;
-    }
-    @media print {
-      html, body {
-        width: 794px !important;
-        height: 1120px !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #ffffff !important;
-        overflow: hidden !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-      body * {
-        visibility: hidden !important;
-      }
-      #areaImpressaoPdf, #areaImpressaoPdf * {
-        visibility: visible !important;
-      }
-      #areaImpressaoPdf {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 794px !important;
-        display: block !important;
+    
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
 
-              /* AJUSTE EXCLUSIVO PARA A IMPRESSÃO EM CELULARES */
-      html.mobile-pdf,
-      html.mobile-pdf body {
-        width: auto !important;
-        height: auto !important;
-        min-height: 0 !important;
-        overflow: visible !important;
-      }
+@media print {
+  html, body {
+    width: 794px !important;
+    height: 1120px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: hidden !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 
-      html.mobile-pdf #areaImpressaoPdf {
-        width: 210mm !important;
-        max-width: none !important;
-      }
+  body * {
+    visibility: hidden !important;
+  }
 
-      html.mobile-pdf #areaImpressaoPdf > div {
-        width: 210mm !important;
-        min-height: 297mm !important;
-        box-sizing: border-box !important;
-      }
-      }
-    }
+  #areaImpressaoPdf,
+  #areaImpressaoPdf * {
+    visibility: visible !important;
+  }
+
+  #areaImpressaoPdf {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 794px !important;
+    display: block !important;
+  }
+
+  /* Ajustes exclusivos para celulares */
+  html.mobile-pdf,
+  html.mobile-pdf body {
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  html.mobile-pdf #areaImpressaoPdf {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 210mm !important;
+    max-width: none !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  html.mobile-pdf #areaImpressaoPdf > div {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    box-sizing: border-box !important;
+  }
+}
+
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
@@ -1216,9 +1228,14 @@ if (ehCelular) {
 
 setTimeout(() => {
   window.print();
+}, 500);
+
+window.addEventListener('afterprint', function restaurarArea() {
   area.classList.add('hidden');
   document.documentElement.classList.remove('mobile-pdf');
-}, 150);
+
+  window.removeEventListener('afterprint', restaurarArea);
+});
     }
   </script>
 </body>
