@@ -91,18 +91,22 @@
   }
 
   /* Safari do iPhone: evita que position:fixed desloque as imagens do cabeçalho e rodapé */
-  html.ios-pdf #areaImpressaoPdf > div {
-    position: relative !important;
+ /* Safari do iPhone: reduz a escala e cancela quebras de página */
+  html.ios-pdf #areaImpressaoPdf {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
   }
 
-  html.ios-pdf #areaImpressaoPdf > div > div:nth-child(1) {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    bottom: auto !important;
-    width: 210mm !important;
-    height: 110px !important;
-    z-index: 100 !important;
+  html.ios-pdf #areaImpressaoPdf > div {
+    position: relative !important;
+    transform: scale(0.86) !important;
+    transform-origin: top center !important;
+    margin: 0 auto !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: avoid !important;
+    break-inside: avoid !important;
   }
 
   /* No Safari, o rodapé entra no fluxo do documento para não ser empurrado para uma segunda página. */
