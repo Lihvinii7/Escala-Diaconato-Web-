@@ -105,15 +105,15 @@
     z-index: 100 !important;
   }
 
-  /* Safari iPhone: o rodapé continua como segundo elemento e fica preso à base da folha. */
-  html.ios-pdf #areaImpressaoPdf > div > div:nth-child(2) {
-    position: absolute !important;
-    left: 0 !important;
+  /* No Safari, o rodapé entra no fluxo do documento para não ser empurrado para uma segunda página. */
+  html.ios-pdf #areaImpressaoPdf > div > div:last-child {
+    position: static !important;
+    left: auto !important;
     top: auto !important;
-    bottom: 0 !important;
-    width: 210mm !important;
+    bottom: auto !important;
+    width: 100% !important;
     height: 90px !important;
-    margin: 0 !important;
+    margin-top: 42px !important;
     z-index: 100 !important;
     break-inside: avoid !important;
     page-break-inside: avoid !important;
@@ -1275,6 +1275,13 @@ const ehIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
 if (ehIOS) {
   document.documentElement.classList.add('ios-pdf');
 
+  // Move o rodapé para depois das tabelas no Safari, evitando que o posicionamento
+  // absoluto/fixo faça a imagem aparecer em uma segunda página.
+  const paginaPdf = area.firstElementChild;
+  if (paginaPdf) {
+    const rodapePdf = paginaPdf.children[1];
+    if (rodapePdf) paginaPdf.appendChild(rodapePdf);
+  }
 }
 
 setTimeout(() => {
