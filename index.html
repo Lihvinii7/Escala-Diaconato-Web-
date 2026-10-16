@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Diaconato - IASD Várzea | Sistema Web</title>
+  <!-- Ícone da Aba do Navegador -->
+  <link rel="icon" type="image/jpeg" href="https://kmpczpeltybcyaidmbsy.supabase.co/storage/v1/object/public/escalas-assets/logo_redonda.jpeg" />
+  <link rel="apple-touch-icon" href="https://kmpczpeltybcyaidmbsy.supabase.co/storage/v1/object/public/escalas-assets/logo_redonda.jpeg" />
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Supabase JS SDK -->
@@ -47,11 +50,14 @@
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
 
   <!-- CABEÇALHO COM LOGIN -->
-  <header class="bg-primaria text-white py-4 px-4 shadow-md">
+  <header class="bg-primaria text-white py-3.5 px-4 shadow-md">
     <div class="max-w-4xl mx-auto flex items-center justify-between">
-      <div>
-        <h1 class="text-xl font-bold">Diaconato - IASD Várzea</h1>
-        <p class="text-xs text-sky-200">Gestão Mensal, Escalas e Equipe</p>
+      <div class="flex items-center gap-3">
+        <img src="https://kmpczpeltybcyaidmbsy.supabase.co/storage/v1/object/public/escalas-assets/logo_redonda.jpeg" alt="Logo IASD" class="w-10 h-10 rounded-full border-2 border-white/30 object-cover shadow-sm" />
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold leading-tight">Diaconato - IASD Várzea</h1>
+          <p class="text-[11px] text-sky-200">Gestão Mensal, Escalas e Equipe</p>
+        </div>
       </div>
       <div class="flex items-center gap-2">
         <button type="button" id="btnAdminTrigger" onclick="abrirModalLogin()" class="text-xs px-3 py-1.5 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 transition font-medium flex items-center gap-1.5">
