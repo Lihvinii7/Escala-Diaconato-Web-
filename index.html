@@ -25,7 +25,6 @@
     @media print {
       html, body {
         width: 100% !important;
-        height: auto !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
@@ -45,21 +44,15 @@
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
-        display: block !important;
-        page-break-after: avoid !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
+        display: flex !important;
+        justify-content: center !important;
       }
-      /* NO COMPUTADOR: 100% normal */
-      .folha-a4-print {
-        width: 100% !important;
-        max-width: 210mm !important;
-        margin: 0 auto !important;
+      #folhaA4Impressao {
+        width: 794px !important;
       }
-      /* SÓ NO CELULAR: reduz 8% para eliminar a 2ª página do Android e estabilizar o Safari */
       @media (max-width: 768px) {
-        .folha-a4-print {
-          transform: scale(0.92) !important;
+        #folhaA4Impressao {
+          transform: scale(0.90) !important;
           transform-origin: top center !important;
         }
       }
@@ -68,7 +61,6 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
 
-  <!-- CABEÇALHO COM LOGIN -->
   <!-- CABEÇALHO COM LOGO E LOGIN -->
   <header class="bg-primaria text-white py-3.5 px-4 shadow-md">
     <div class="max-w-4xl mx-auto flex items-center justify-between">
@@ -354,7 +346,7 @@
     const URL_TOPO_IMG = "https://kmpczpeltybcyaidmbsy.supabase.co/storage/v1/object/public/escalas-assets/topo.jpeg";
     const URL_RODAPE_IMG = "https://kmpczpeltybcyaidmbsy.supabase.co/storage/v1/object/public/escalas-assets/rodape.jpeg";
 
-    // SENHA DO PAINEL (Altere aqui se desejar)
+    // SENHA DO PAINEL
     const SENHA_ADMIN = "iasd2026";
     let isAdmin = sessionStorage.getItem('isAdminLogged') === 'true';
 
@@ -1086,7 +1078,7 @@
 
       const modoCompacto = (qtdSab >= 5 && qtdQua >= 5) || (qtdSab + qtdDom + qtdQua >= 14);
 
-     let html = `
+      let html = `
         <div id="folhaA4Impressao" style="width: 794px; min-height: 1080px; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; color: #1b1b1b; padding-left: 32px; padding-right: 32px; padding-top: 20px; padding-bottom: 20px; background: #ffffff; margin: 0 auto; display: flex; flex-direction: column; justify-content: space-between;">
           
           <div>
@@ -1195,12 +1187,10 @@
         `;
       }
 
+      // fecha o bloco superior de conteudo
       html += `</div>`;
 
-      
-      html += `</div>`;
-
-     
+      // insere o rodape na base
       if (URL_RODAPE_IMG) {
         html += `
           <div style="width: 100%; height: 85px; margin-top: 10px;">
@@ -1209,7 +1199,7 @@
         `;
       }
 
-      
+      // fecha o container principal #folhaA4Impressao
       html += `</div>`;
 
       const area = document.getElementById('areaImpressaoPdf');
