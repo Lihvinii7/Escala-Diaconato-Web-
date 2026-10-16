@@ -90,6 +90,18 @@
     page-break-inside: avoid !important;
   }
 
+  /* iPhone: remove o restante do site do fluxo de impressão para não criar folha vazia.
+     Mantém a área do PDF e preserva o layout que funcionou na versão v2. */
+  html.ios-pdf body > *:not(#areaImpressaoPdf) {
+    display: none !important;
+  }
+
+  html.ios-pdf body {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
   /* Safari do iPhone: evita que position:fixed desloque as imagens do cabeçalho e rodapé */
   html.ios-pdf #areaImpressaoPdf > div {
     position: relative !important;
