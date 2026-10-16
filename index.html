@@ -44,6 +44,23 @@
         width: 794px !important;
         display: block !important;
       }
+
+      /* ======================================================== */
+      /* REGRAS EXCLUSIVAS PARA CELULAR (ANDROID E IPHONE/SAFARI) */
+      /* ======================================================== */
+      @media (max-width: 768px) {
+        #areaImpressaoPdf {
+          /* Encolhe 10% suavemente no mobile para eliminar a 2ª página do Android */
+          transform: scale(0.90) !important;
+          transform-origin: top left !important;
+          width: 794px !important;
+        }
+
+        /* Corrige o bug do Safari/iOS convertendo o fixed para absolute na impressão móvel */
+        #areaImpressaoPdf div[style*="position: fixed"] {
+          position: absolute !important;
+        }
+      }
     }
   </style>
 </head>
