@@ -25,9 +25,11 @@
     @media print {
       html, body {
         width: 100% !important;
+        height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
+        overflow: hidden !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
@@ -38,21 +40,29 @@
         visibility: visible !important;
       }
       #areaImpressaoPdf {
-        position: absolute !important;
+        position: fixed !important;
         left: 0 !important;
         top: 0 !important;
         width: 100% !important;
+        height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         display: flex !important;
         justify-content: center !important;
+        align-items: flex-start !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
       }
       #folhaA4Impressao {
         width: 794px !important;
+        height: 1120px !important;
+        max-height: 1120px !important;
+        overflow: hidden !important;
       }
+      /* Ajuste dinâmico só no celular para evitar 2ª/4ª página */
       @media (max-width: 768px) {
         #folhaA4Impressao {
-          transform: scale(0.90) !important;
+          transform: scale(0.92) !important;
           transform-origin: top center !important;
         }
       }
@@ -1067,7 +1077,7 @@
       }
     }
 
-    // GERADOR DO PDF OFICIAL (DISTRIBUIÇÃO HARMONIOSA A4)
+    // GERADOR DO PDF OFICIAL (DISTRIBUIÇÃO HARMONIOSA A4 DE PONTA A PONTA)
     function gerarPdfOficial() {
       const mesNome = MESES[mesSelecionado - 1];
       const anoNome = anoSelecionado;
@@ -1079,19 +1089,20 @@
       const modoCompacto = (qtdSab >= 5 && qtdQua >= 5) || (qtdSab + qtdDom + qtdQua >= 14);
 
       let html = `
-        <div id="folhaA4Impressao" style="width: 794px; min-height: 1080px; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; color: #1b1b1b; padding-left: 32px; padding-right: 32px; padding-top: 20px; padding-bottom: 20px; background: #ffffff; margin: 0 auto; display: flex; flex-direction: column; justify-content: space-between;">
+        <div id="folhaA4Impressao" style="position: relative; width: 794px; height: 1120px; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; color: #1b1b1b; background: #ffffff; margin: 0 auto; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
           
           <div>
             ${URL_TOPO_IMG ? `
-              <div style="width: 100%; height: 110px; margin-bottom: 12px;">
-                <img src="${URL_TOPO_IMG}" style="width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 4px;" />
+              <div style="width: 100%; height: 110px; margin: 0 0 10px 0;">
+                <img src="${URL_TOPO_IMG}" style="width: 100%; height: 100%; display: block; object-fit: cover;" />
               </div>
             ` : ''}
 
-            <div style="text-align: center; margin: 4px 0 12px 0;">
-              <h1 style="margin: 0; font-size: ${modoCompacto ? '20px' : '22px'}; font-weight: 900; text-transform: uppercase; color: #1f3a57; letter-spacing: .5px;">ESCALA DE DIACONATO</h1>
-              <h2 style="margin: 2px 0 0 0; font-size: ${modoCompacto ? '18px' : '20px'}; font-weight: 900; color: #42576b; text-transform: capitalize;">${mesNome} de ${anoNome}</h2>
-            </div>
+            <div style="padding-left: 28px; padding-right: 28px;">
+              <div style="text-align: center; margin: 2px 0 10px 0;">
+                <h1 style="margin: 0; font-size: ${modoCompacto ? '21px' : '23px'}; font-weight: 900; text-transform: uppercase; color: #1f3a57; letter-spacing: .5px;">ESCALA DE DIACONATO</h1>
+                <h2 style="margin: 2px 0 0 0; font-size: ${modoCompacto ? '18px' : '20px'}; font-weight: 900; color: #42576b; text-transform: capitalize;">${mesNome} de ${anoNome}</h2>
+              </div>
       `;
 
       // SÁBADOS
@@ -1187,19 +1198,19 @@
         `;
       }
 
-      // fecha o bloco superior de conteudo
-      html += `</div>`;
+      html += `
+            </div>
+          </div>
+      `;
 
-      // insere o rodape na base
       if (URL_RODAPE_IMG) {
         html += `
-          <div style="width: 100%; height: 85px; margin-top: 10px;">
-            <img src="${URL_RODAPE_IMG}" style="width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 4px;" />
+          <div style="width: 100%; height: 85px; margin: 0;">
+            <img src="${URL_RODAPE_IMG}" style="width: 100%; height: 100%; display: block; object-fit: cover;" />
           </div>
         `;
       }
 
-      // fecha o container principal #folhaA4Impressao
       html += `</div>`;
 
       const area = document.getElementById('areaImpressaoPdf');
