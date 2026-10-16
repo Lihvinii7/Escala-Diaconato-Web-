@@ -129,6 +129,25 @@
     display: block !important;
     object-fit: fill !important;
   }
+
+  /* iPhone Safari: margem de segurança contra página extra por arredondamento A4 */
+  html.ios-pdf,
+  html.ios-pdf body {
+    height: 296mm !important;
+    min-height: 296mm !important;
+    max-height: 296mm !important;
+    overflow: hidden !important;
+  }
+
+  html.ios-pdf #areaImpressaoPdf,
+  html.ios-pdf #areaImpressaoPdf > div {
+    height: 296mm !important;
+    min-height: 296mm !important;
+    max-height: 296mm !important;
+    overflow: hidden !important;
+    break-after: avoid-page !important;
+    page-break-after: avoid !important;
+  }
 }
 
   </style>
