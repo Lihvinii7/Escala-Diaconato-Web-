@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diaconato - IASD Várzea | Sistema Web</title>
+
+  <!-- Ícone da Aba do Navegador -->
+  <link rel="icon" type="image/jpeg" href="https://kmpczpeltybcyaidmbsy.supabase.co/storage/v1/object/public/escalas-assets/logo_redonda.jpeg" />
+  <link rel="apple-touch-icon" href="https://kmpczpeltybcyaidmbsy.supabase.co/storage/v1/object/public/escalas-assets/logo_redonda.jpeg" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .bg-primaria { background-color: #0b4f7b; }
+    .text-primaria { color: #0b4f7b; }
+    .tab-ativa { border-bottom: 3px solid #0b4f7b; color: #0b4f7b; font-weight: bold; }
+    
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    @media print {
+      html, body {
+        width: 794px !important;
+        height: 1120px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: hidden !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      body * {
+        visibility: hidden !important;
+      }
+      #areaImpressaoPdf, #areaImpressaoPdf * {
+        visibility: visible !important;
+      }
+      #areaImpressaoPdf {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 794px !important;
+        display: block !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
+
+  <!-- CABEÇALHO COM LOGIN -->
+  <!-- CABEÇALHO COM LOGO E LOGIN -->
+  <header class="bg-primaria text-white py-3.5 px-4 shadow-md">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="https://kmpczpeltybcyaidmbsy.supabase.co/storage/v1/object/public/escalas-assets/logo_redonda.jpeg" alt="Logo IASD" class="w-10 h-10 rounded-full border-2 border-white/30 object-cover shadow-sm" />
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold leading-tight">Diaconato - IASD Várzea</h1>
+          <p class="text-[11px] text-sky-200">Gestão Mensal, Escalas e Equipe</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" id="btnAdminTrigger" onclick="abrirModalLogin()" class="text-xs px-3 py-1.5 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 transition font-medium flex items-center gap-1.5">
+          <span id="txtIconeAuth">🔒</span>
+          <span id="txtStatusAuth">Entrar como Admin</span>
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- NAVEGAÇÃO DE ABAS -->
+  <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-4xl mx-auto flex">
+      <button type="button" onclick="mudarAba('escalas')" id="btnAbaEscalas" class="flex-1 py-3 text-center text-xs sm:text-sm font-semibold tab-ativa transition cursor-pointer">
+        📅 Escalas
+      </button>
+      <button type="button" onclick="mudarAba('lembretes')" id="btnAbaLembretes" class="flex-1 py-3 text-center text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer">
+        💬 Lembretes
+      </button>
+      <button type="button" onclick="mudarAba('equipe')" id="btnAbaEquipe" class="flex-1 py-3 text-center text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer">
+        👥 Equipe (<span id="contadorEquipe">0</span>)
+      </button>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto w-full p-3 sm:p-6 flex-1 pb-24">
+
+    <!-- ==================== ABA 1: ESCALAS ==================== -->
+    <div id="conteudoEscalas" class="space-y-5">
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <h2 class="text-sm font-bold text-slate-800 mb-3">Mês da Escala</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="col-span-1 sm:col-span-2">
+            <label class="text-[11px] font-bold text-slate-600 block mb-1">Mês:</label>
+            <select id="selMes" onchange="alterarMesAno()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-800 focus:outline-none">
+              <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+              <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+              <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+              <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-slate-600 block mb-1">Ano:</label>
+            <input type="number" id="inpAno" onchange="alterarMesAno()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-800 text-center focus:outline-none" />
+          </div>
+          <div class="flex items-end">
+            <button type="button" onclick="carregarDadosEscala()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-lg text-xs transition">
+              Recarregar
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-100">
+          <button type="button" onclick="acaoRestrita(salvarEscalaBanco)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-1.5 shadow transition">
+            💾 Guardar no Banco
+          </button>
+          <button type="button" onclick="gerarPdfOficial()" class="w-full bg-primaria hover:opacity-95 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-1.5 shadow transition">
+            📄 Gerar PDF Oficial
+          </button>
+        </div>
+      </div>
+
+      <!-- SÁBADOS -->
+      <section class="space-y-3">
+        <h3 class="text-xs font-extrabold uppercase tracking-wider text-white bg-blue-900 px-3 py-2 rounded-lg flex items-center gap-2">
+          <span>🟦</span> SÁBADOS (<span id="qtdSabados">0</span>)
+        </h3>
+        <div id="listaSabados" class="space-y-4"></div>
+      </section>
+
+      <!-- DOMINGOS -->
+      <section class="space-y-3">
+        <h3 class="text-xs font-extrabold uppercase tracking-wider text-white bg-emerald-800 px-3 py-2 rounded-lg flex items-center gap-2">
+          <span>🟩</span> DOMINGOS (<span id="qtdDomingos">0</span>)
+        </h3>
+        <div id="listaDomingos" class="space-y-4"></div>
+      </section>
+
+      <!-- QUARTAS -->
+      <section class="space-y-3">
+        <h3 class="text-xs font-extrabold uppercase tracking-wider text-white bg-amber-700 px-3 py-2 rounded-lg flex items-center gap-2">
+          <span>🟨</span> QUARTAS-FEIRAS (<span id="qtdQuartas">0</span>)
+        </h3>
+        <div id="listaQuartas" class="space-y-4"></div>
+      </section>
+    </div>
+
+    <!-- ==================== ABA 2: LEMBRETES ==================== -->
+    <div id="conteudoLembretes" class="hidden space-y-5">
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm">
+        <div class="mb-3">
+          <h3 class="text-sm font-bold text-blue-900">📋 Escala Digitada Completa</h3>
+          <p class="text-xs text-blue-700 mt-0.5">Texto estruturado de todo o mês para o WhatsApp.</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button type="button" onclick="copiarEscalaDigitadaWhatsApp()" class="flex-1 bg-blue-700 hover:bg-blue-600 text-white text-xs font-bold py-2.5 rounded-lg transition">
+            Copiar Todo o Mês
+          </button>
+          <button type="button" onclick="abrirModalVisualizarDigitado()" class="flex-1 bg-white border border-blue-700 text-blue-700 hover:bg-blue-50 text-xs font-bold py-2.5 rounded-lg transition">
+            Visualizar Texto
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-bold text-slate-800">Lembretes Semanais</h3>
+        <p class="text-xs text-slate-500 mb-3">Preenche os dados conforme o culto seguinte.</p>
+        <div id="listaTemplates" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- ==================== ABA 3: EQUIPE ==================== -->
+    <div id="conteudoEquipe" class="hidden space-y-4">
+      <div class="flex gap-2">
+        <button type="button" onclick="acaoRestrita(abrirModalNovoMembro)" class="flex-1 bg-primaria text-white font-bold py-2.5 rounded-xl text-xs hover:opacity-95 shadow transition">
+          + Adicionar Membro
+        </button>
+        <button type="button" onclick="acaoRestrita(abrirModalLote)" class="flex-1 bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-slate-600 shadow transition">
+          📋 Em Lote
+        </button>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-2.5 flex items-center gap-2">
+        <span class="text-slate-400">🔍</span>
+        <input type="text" id="buscaMembrosInput" oninput="filtrarListaEquipe()" placeholder="Pesquisar por nome ou cargo..." class="w-full text-xs font-semibold text-slate-700 focus:outline-none bg-transparent" />
+      </div>
+
+      <div id="listaMembrosCadastrados" class="space-y-2"></div>
+    </div>
+
+  </main>
+
+  <!-- ==================== MODAL: LOGIN ADMINISTRATIVO ==================== -->
+  <div id="modalLogin" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <h3 class="text-sm font-bold text-primaria flex items-center gap-1.5">
+          <span>🔐</span> Acesso de Administrador
+        </h3>
+        <button type="button" onclick="fecharModalLogin()" class="text-slate-400 hover:text-slate-700 font-bold text-lg">&times;</button>
+      </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 block mb-1">Palavra-passe de gestão:</label>
+        <input type="password" id="inputSenhaAdmin" placeholder="Digite a senha..." class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-semibold focus:outline-none" onkeydown="if(event.key === 'Enter') efetuarLogin()" />
+      </div>
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" onclick="fecharModalLogin()" class="px-3 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg text-xs">Cancelar</button>
+        <button type="button" onclick="efetuarLogin()" class="px-4 py-2 bg-primaria text-white font-bold rounded-lg text-xs">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: VISUALIZAR ESCALA DIGITADA -->
+  <div id="modalVisualizarDigitado" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl p-5 shadow-2xl flex flex-col max-h-[85vh]">
+      <div class="flex justify-between items-center border-b border-slate-200 pb-3 mb-3">
+        <h3 class="text-sm font-bold text-primaria" id="modalDigitadoTitulo">Escala Digitada</h3>
+        <button type="button" onclick="fecharModalVisualizarDigitado()" class="text-slate-400 hover:text-slate-700 font-bold text-xl leading-none">&times;</button>
+      </div>
+      <textarea id="textoDigitadoPreview" readonly class="w-full h-80 border border-slate-300 rounded-xl p-3 text-xs font-mono text-slate-800 bg-slate-50 resize-none focus:outline-none overflow-y-auto leading-relaxed shadow-inner"></textarea>
+      <div class="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-3">
+        <button type="button" onclick="fecharModalVisualizarDigitado()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs transition">Fechar</button>
+        <button type="button" onclick="copiarEscalaDigitadaWhatsApp(); fecharModalVisualizarDigitado();" class="px-5 py-2 bg-primaria hover:opacity-90 text-white font-bold rounded-lg text-xs transition shadow">Copiar Texto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SELETOR DE NOME -->
+  <div id="modalSeletor" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
+    <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <h3 id="modalSeletorTitulo" class="text-sm font-bold text-primaria">Selecionar Oficial</h3>
+        <button type="button" onclick="fecharModalSeletor()" class="text-slate-400 hover:text-slate-700 font-bold text-lg">&times;</button>
+      </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 block mb-1">Digitar ou buscar oficial:</label>
+        <input type="text" id="modalSeletorInput" oninput="atualizarSugestoesOficiais()" placeholder="Digite o nome..." class="w-full border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:outline-none" />
+      </div>
+      <div class="flex gap-2">
+        <button type="button" onclick="confirmarNomeDigitado()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-xs">
+          Usar Nome Digitado
+        </button>
+        <button type="button" onclick="limparSelecaoOficial()" class="bg-red-500 hover:bg-red-400 text-white font-bold px-3 py-2 rounded-lg text-xs">
+          Limpar
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto space-y-1.5 border border-slate-100 rounded-lg p-2" id="listaSugestoesOficiais"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO MEMBRO INDIVIDUAL -->
+  <div id="modalNovoMembro" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl space-y-3">
+      <h3 class="text-sm font-bold text-primaria border-b border-slate-100 pb-2">Registar Novo Oficial</h3>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 block mb-1">Nome Completo:</label>
+        <input type="text" id="novoMembroNome" placeholder="Ex: JOÃO SILVA" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:outline-none uppercase" />
+      </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 block mb-1">Cargo:</label>
+        <select id="novoMembroCargo" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:outline-none bg-slate-50">
+          <option value="Diácono">Diácono</option>
+          <option value="Diaconisa">Diaconisa</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 block mb-1">Telefone (Opcional):</label>
+        <input type="text" id="novoMembroTelefone" placeholder="(81) 98888-7777" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:outline-none" />
+      </div>
+      <div class="flex justify-end gap-2 pt-3">
+        <button type="button" onclick="fecharModalNovoMembro()" class="px-3 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg text-xs">Cancelar</button>
+        <button type="button" onclick="salvarNovoMembroIndividual()" class="px-4 py-2 bg-primaria text-white font-bold rounded-lg text-xs">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR MEMBRO -->
+  <div id="modalEditarMembro" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl space-y-3">
+      <h3 class="text-sm font-bold text-primaria border-b border-slate-100 pb-2">Editar Oficial</h3>
+      <input type="hidden" id="editMembroId" />
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 block mb-1">Nome Completo:</label>
+        <input type="text" id="editMembroNome" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:outline-none uppercase" />
+      </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 block mb-1">Cargo:</label>
+        <select id="editMembroCargo" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:outline-none bg-slate-50">
+          <option value="Diácono">Diácono</option>
+          <option value="Diaconisa">Diaconisa</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 block mb-1">Telefone:</label>
+        <input type="text" id="editMembroTelefone" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:outline-none" />
+      </div>
+      <div class="flex justify-end gap-2 pt-3">
+        <button type="button" onclick="fecharModalEditarMembro()" class="px-3 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg text-xs">Cancelar</button>
+        <button type="button" onclick="salvarEdicaoMembro()" class="px-4 py-2 bg-primaria text-white font-bold rounded-lg text-xs">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LOTE -->
+  <div id="modalLote" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
+    <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-3">
+      <h3 class="text-sm font-bold text-primaria border-b border-slate-100 pb-2">Registo em Lote</h3>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 block mb-1">Cargo:</label>
+        <select id="cargoLote" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:outline-none bg-slate-50">
+          <option value="Diácono">Diáconos</option>
+          <option value="Diaconisa">Diaconisas</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 block mb-1">Cole os nomes (um por linha):</label>
+        <textarea id="textoLoteNomes" rows="6" placeholder="PAULO CESAR&#10;GABRIEL LIMA&#10;MARCOS VINICIUS" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-mono uppercase focus:outline-none"></textarea>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="fecharModalLote()" class="px-3 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg text-xs">Cancelar</button>
+        <button type="button" onclick="processarLoteMembros()" class="px-4 py-2 bg-primaria text-white font-bold rounded-lg text-xs">Processar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÁREA DE IMPRESSÃO DO PDF -->
+  <div id="areaImpressaoPdf" class="hidden"></div>
+
+  <!-- ==================== SCRIPT ==================== -->
+  <script>
+    const SUPABASE_URL = 'https://kmpczpeltybcyaidmbsy.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttcGN6cGVsdHliY3lhaWRtYnN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NDMxODUsImV4cCI6MjEwNTMxOTE4NX0.il531PW6Y0mPjSqgmgyelpZiqnolv49885lIFHiidOU';
+
+    const URL_TOPO_IMG = "https://kmpczpeltybcyaidmbsy.supabase.co/storage/v1/object/public/escalas-assets/topo.jpeg";
+    const URL_RODAPE_IMG = "https://kmpczpeltybcyaidmbsy.supabase.co/storage/v1/object/public/escalas-assets/rodape.jpeg";
+
+    // SENHA DO PAINEL (Altere aqui se desejar)
+    const SENHA_ADMIN = "iasd2026";
+    let isAdmin = sessionStorage.getItem('isAdminLogged') === 'true';
+
+    let clientSupabase = null;
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+      clientSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    const MESES = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    let mesSelecionado = 10;
+    let anoSelecionado = 2026;
+    let membros = [];
+    let templates = [];
+    let dadosEscala = {};
+    let diasCulto = { sabados: [], domingos: [], quartas: [] };
+
+    let seletorChaveAtual = '';
+    let seletorFiltroAtual = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('selMes').value = mesSelecionado;
+      document.getElementById('inpAno').value = anoSelecionado;
+      atualizarEstadoAuth();
+      calcularDiasDoMes();
+      carregarDadosIniciais();
+    });
+
+    // SISTEMA DE LOGIN E CONTROLE DE PERMISSÕES
+    function atualizarEstadoAuth() {
+      const txtIcone = document.getElementById('txtIconeAuth');
+      const txtStatus = document.getElementById('txtStatusAuth');
+      if (isAdmin) {
+        txtIcone.innerText = '🔓';
+        txtStatus.innerText = 'Sair (Admin)';
+      } else {
+        txtIcone.innerText = '🔒';
+        txtStatus.innerText = 'Entrar como Admin';
+      }
+    }
+
+    function abrirModalLogin() {
+      if (isAdmin) {
+        if (confirm('Deseja encerrar o modo Administrador?')) {
+          isAdmin = false;
+          sessionStorage.removeItem('isAdminLogged');
+          atualizarEstadoAuth();
+          renderizarCultos();
+          renderizarListaEquipe();
+        }
+        return;
+      }
+      document.getElementById('inputSenhaAdmin').value = '';
+      document.getElementById('modalLogin').classList.remove('hidden');
+      setTimeout(() => document.getElementById('inputSenhaAdmin').focus(), 100);
+    }
+
+    function fecharModalLogin() {
+      document.getElementById('modalLogin').classList.add('hidden');
+    }
+
+    function efetuarLogin() {
+      const senha = document.getElementById('inputSenhaAdmin').value.trim();
+      if (senha === SENHA_ADMIN) {
+        isAdmin = true;
+        sessionStorage.setItem('isAdminLogged', 'true');
+        atualizarEstadoAuth();
+        fecharModalLogin();
+        renderizarCultos();
+        renderizarListaEquipe();
+        alert('Acesso administrativo concedido com sucesso!');
+      } else {
+        alert('Senha incorreta.');
+      }
+    }
+
+    function acaoRestrita(funcao) {
+      if (!isAdmin) {
+        alert('Ação restrita aos líderes e administradores. Por favor, autentique-se primeiro.');
+        abrirModalLogin();
+        return;
+      }
+      funcao();
+    }
+
+    function mudarAba(aba) {
+      document.getElementById('conteudoEscalas').classList.add('hidden');
+      document.getElementById('conteudoLembretes').classList.add('hidden');
+      document.getElementById('conteudoEquipe').classList.add('hidden');
+
+      document.getElementById('btnAbaEscalas').className = "flex-1 py-3 text-center text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer";
+      document.getElementById('btnAbaLembretes').className = "flex-1 py-3 text-center text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer";
+      document.getElementById('btnAbaEquipe').className = "flex-1 py-3 text-center text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer";
+
+      if (aba === 'escalas') {
+        document.getElementById('conteudoEscalas').classList.remove('hidden');
+        document.getElementById('btnAbaEscalas').className = "flex-1 py-3 text-center text-xs sm:text-sm font-semibold tab-ativa transition cursor-pointer";
+      } else if (aba === 'lembretes') {
+        document.getElementById('conteudoLembretes').classList.remove('hidden');
+        document.getElementById('btnAbaLembretes').className = "flex-1 py-3 text-center text-xs sm:text-sm font-semibold tab-ativa transition cursor-pointer";
+        renderizarTemplatesLembretes();
+      } else if (aba === 'equipe') {
+        document.getElementById('conteudoEquipe').classList.remove('hidden');
+        document.getElementById('btnAbaEquipe').className = "flex-1 py-3 text-center text-xs sm:text-sm font-semibold tab-ativa transition cursor-pointer";
+        renderizarListaEquipe();
+      }
+    }
+
+    function alterarMesAno() {
+      mesSelecionado = parseInt(document.getElementById('selMes').value, 10);
+      anoSelecionado = parseInt(document.getElementById('inpAno').value, 10) || 2026;
+      calcularDiasDoMes();
+    }
+
+    function calcularDiasDoMes() {
+      const sabados = [];
+      const domingos = [];
+      const quartas = [];
+      const totalDias = new Date(anoSelecionado, mesSelecionado, 0).getDate();
+
+      for (let dia = 1; dia <= totalDias; dia++) {
+        const d = new Date(anoSelecionado, mesSelecionado - 1, dia);
+        const diaSemana = d.getDay();
+        const isoData = `${anoSelecionado}-${String(mesSelecionado).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+        const rotulo = `${String(dia).padStart(2, '0')}/${String(mesSelecionado).padStart(2, '0')}`;
+
+        if (diaSemana === 6) sabados.push({ data: isoData, rotulo });
+        if (diaSemana === 0) domingos.push({ data: isoData, rotulo });
+        if (diaSemana === 3) quartas.push({ data: isoData, rotulo });
+      }
+
+      diasCulto = { sabados, domingos, quartas };
+      document.getElementById('qtdSabados').innerText = sabados.length;
+      document.getElementById('qtdDomingos').innerText = domingos.length;
+      document.getElementById('qtdQuartas').innerText = quartas.length;
+
+      renderizarCultos();
+      carregarDadosEscala();
+    }
+
+    async function carregarDadosIniciais() {
+      if (!clientSupabase) return;
+      try {
+        const resMembros = await clientSupabase.from('membros').select('*').order('nome');
+        if (resMembros.data) {
+          membros = resMembros.data;
+          document.getElementById('contadorEquipe').innerText = membros.length;
+          renderizarListaEquipe();
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+
+      try {
+        const resTemplates = await clientSupabase.from('templates_lembretes').select('*');
+        if (resTemplates.data) {
+          templates = resTemplates.data;
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    async function carregarDadosEscala() {
+      if (!clientSupabase) return;
+      try {
+        const primeiroDia = `${anoSelecionado}-${String(mesSelecionado).padStart(2, '0')}-01`;
+        const ultimoDia = `${anoSelecionado}-${String(mesSelecionado).padStart(2, '0')}-${new Date(anoSelecionado, mesSelecionado, 0).getDate()}`;
+
+        const { data, error } = await clientSupabase
+          .from('escalas')
+          .select('*')
+          .gte('data_culto', primeiroDia)
+          .lte('data_culto', ultimoDia);
+
+        if (error) return console.warn(error.message);
+
+        const mapa = {};
+        (data || []).forEach(reg => {
+          const dt = reg.data_culto;
+          if (reg.abertura_nome) mapa[`${dt}_abrir`] = reg.abertura_nome;
+          (reg.recolhimento_nomes || []).forEach((nome, idx) => {
+            mapa[`${dt}_recolher_${idx}`] = nome;
+          });
+          (reg.cobertura_nomes || []).forEach((nome, idx) => {
+            mapa[`${dt}_cobrir_${idx}`] = nome;
+          });
+          (reg.saida_nomes || []).forEach((nome, idx) => {
+            mapa[`${dt}_saida_${idx}`] = nome;
+          });
+        });
+
+        dadosEscala = mapa;
+        renderizarCultos();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderizarCultos() {
+      renderizarBloco('listaSabados', diasCulto.sabados, 'sabado');
+      renderizarBloco('listaDomingos', diasCulto.domingos, 'domingo');
+      renderizarBloco('listaQuartas', diasCulto.quartas, 'quarta');
+    }
+
+    function renderizarBloco(elementId, listaDias, tipo) {
+      const container = document.getElementById(elementId);
+      container.innerHTML = '';
+
+      if (listaDias.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-2">Nenhum culto encontrado.</p>`;
+        return;
+      }
+
+      listaDias.forEach(dia => {
+        const dt = dia.data;
+        const card = document.createElement('div');
+        card.className = "bg-white border border-slate-200 rounded-xl p-3.5 shadow-sm space-y-3";
+
+        let html = `
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <span class="text-xs font-bold text-slate-800">Culto - ${dia.rotulo}</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 uppercase">${tipo}</span>
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-600 block mb-1">Abrir Igreja (Diácono):</label>
+            <div onclick="tentarEditarEscala('${dt}_abrir', 'Abrir Igreja (${dia.rotulo})', 'homens')" class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-semibold text-slate-700 cursor-pointer hover:border-slate-400">
+              ${dadosEscala[`${dt}_abrir`] || '<span class="text-slate-400 font-normal">Selecionar diácono responsável</span>'}
+            </div>
+          </div>
+        `;
+
+        const vagasRecolhimento = tipo === 'sabado' ? [0, 1, 2, 3] : [0, 1];
+        html += `
+          <div>
+            <label class="text-[11px] font-bold text-slate-600 block mb-1">Recolhimento (${vagasRecolhimento.length} vagas):</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              ${vagasRecolhimento.map(pos => `
+                <div onclick="tentarEditarEscala('${dt}_recolher_${pos}', 'Recolhimento ${pos + 1} (${dia.rotulo})')" class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-semibold text-slate-700 cursor-pointer hover:border-slate-400">
+                  ${dadosEscala[`${dt}_recolher_${pos}`] || `<span class="text-slate-400 font-normal">Recolhimento ${pos + 1}</span>`}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        if (tipo === 'sabado') {
+          html += `
+            <div>
+              <label class="text-[11px] font-bold text-slate-600 block mb-1">Cobrir a Salva (2 Diaconisas):</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                ${[0, 1].map(pos => `
+                  <div onclick="tentarEditarEscala('${dt}_cobrir_${pos}', 'Cobrir Salva ${pos + 1} (${dia.rotulo})', 'mulheres')" class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-semibold text-slate-700 cursor-pointer hover:border-slate-400">
+                    ${dadosEscala[`${dt}_cobrir_${pos}`] || `<span class="text-slate-400 font-normal">Cobrir Salva ${pos + 1}</span>`}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-600 block mb-1">🚶‍♂️ Ordenação de Saída (2 Diáconos):</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                ${[0, 1].map(pos => `
+                  <div onclick="tentarEditarEscala('${dt}_saida_${pos}', 'Ordenação de Saída ${pos + 1} (${dia.rotulo})', 'homens')" class="bg-emerald-50 border border-emerald-200 rounded-lg p-2 text-xs font-semibold text-emerald-900 cursor-pointer hover:border-emerald-300">
+                    ${dadosEscala[`${dt}_saida_${pos}`] || `<span class="text-emerald-500/70 font-normal">Saída ${pos + 1} (Diácono)</span>`}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        card.innerHTML = html;
+        container.appendChild(card);
+      });
+    }
+
+    function tentarEditarEscala(chave, titulo, filtro = null) {
+      if (!isAdmin) {
+        alert('Apenas administradores podem modificar as vagas da escala.');
+        abrirModalLogin();
+        return;
+      }
+      abrirModalSeletor(chave, titulo, filtro);
+    }
+
+    function abrirModalSeletor(chave, titulo, filtro = null) {
+      seletorChaveAtual = chave;
+      seletorFiltroAtual = filtro;
+      document.getElementById('modalSeletorTitulo').innerText = titulo;
+      document.getElementById('modalSeletorInput').value = dadosEscala[chave] || '';
+      document.getElementById('modalSeletor').classList.remove('hidden');
+      atualizarSugestoesOficiais();
+      document.getElementById('modalSeletorInput').focus();
+    }
+
+    function fecharModalSeletor() {
+      document.getElementById('modalSeletor').classList.add('hidden');
+    }
+
+    function confirmarNomeDigitado() {
+      const nome = document.getElementById('modalSeletorInput').value.trim().toUpperCase();
+      if (nome) dadosEscala[seletorChaveAtual] = nome;
+      fecharModalSeletor();
+      renderizarCultos();
+    }
+
+    function limparSelecaoOficial() {
+      delete dadosEscala[seletorChaveAtual];
+      fecharModalSeletor();
+      renderizarCultos();
+    }
+
+    function selecionarNome(nome) {
+      dadosEscala[seletorChaveAtual] = nome;
+      fecharModalSeletor();
+      renderizarCultos();
+    }
+
+    function atualizarSugestoesOficiais() {
+      const termo = document.getElementById('modalSeletorInput').value.trim().toUpperCase();
+      let lista = membros.filter(m => m.ativo);
+
+      if (seletorFiltroAtual === 'mulheres') {
+        lista = lista.filter(m => (m.cargo || m.tipo || '').toLowerCase().includes('diaconisa'));
+      }
+      if (seletorFiltroAtual === 'homens') {
+        lista = lista.filter(m => (m.cargo || m.tipo || '').toLowerCase().includes('diácono') || (m.cargo || m.tipo || '').toLowerCase().includes('diacono'));
+      }
+      if (termo) {
+        lista = lista.filter(m => m.nome.toUpperCase().includes(termo));
+      }
+
+      const container = document.getElementById('listaSugestoesOficiais');
+      container.innerHTML = '';
+
+      if (lista.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-3 text-center">Nenhum oficial encontrado.</p>`;
+        return;
+      }
+
+      lista.forEach(m => {
+        const item = document.createElement('div');
+        item.className = "flex justify-between items-center p-2 rounded-lg hover:bg-slate-100 cursor-pointer text-xs border-b border-slate-50 transition";
+        item.innerHTML = `
+          <span class="font-bold text-slate-800">${m.nome}</span>
+          <span class="text-[11px] text-slate-500">${m.cargo || m.tipo}</span>
+        `;
+        item.onclick = () => selecionarNome(m.nome);
+        container.appendChild(item);
+      });
+    }
+
+    async function salvarEscalaBanco() {
+      if (!clientSupabase) return alert('Supabase não conectado.');
+      try {
+        const todosDias = [...diasCulto.sabados, ...diasCulto.domingos, ...diasCulto.quartas];
+        const datasArray = todosDias.map(d => d.data);
+
+        if (datasArray.length > 0) {
+          await clientSupabase.from('escalas').delete().in('data_culto', datasArray);
+        }
+
+        const registros = [];
+
+        todosDias.forEach(d => {
+          const dt = d.data;
+          const diaObj = new Date(dt + 'T12:00:00');
+          const diaSemanaNum = diaObj.getDay();
+          let dia_semana = 'sabado';
+          if (diaSemanaNum === 0) dia_semana = 'domingo';
+          if (diaSemanaNum === 3) dia_semana = 'quarta';
+
+          const abertura_nome = dadosEscala[`${dt}_abrir`] || null;
+          const recolhimento_nomes = [
+            dadosEscala[`${dt}_recolher_0`],
+            dadosEscala[`${dt}_recolher_1`],
+            dadosEscala[`${dt}_recolher_2`],
+            dadosEscala[`${dt}_recolher_3`]
+          ].filter(Boolean);
+
+          const cobertura_nomes = [
+            dadosEscala[`${dt}_cobrir_0`],
+            dadosEscala[`${dt}_cobrir_1`]
+          ].filter(Boolean);
+
+          const saida_nomes = [
+            dadosEscala[`${dt}_saida_0`],
+            dadosEscala[`${dt}_saida_1`]
+          ].filter(Boolean);
+
+          if (abertura_nome || recolhimento_nomes.length > 0 || cobertura_nomes.length > 0 || saida_nomes.length > 0) {
+            registros.push({
+              data_culto: dt,
+              dia_semana,
+              abertura_nome,
+              recolhimento_nomes,
+              cobertura_nomes,
+              saida_nomes
+            });
+          }
+        });
+
+        if (registros.length > 0) {
+          const { error } = await clientSupabase.from('escalas').insert(registros);
+          if (error) throw error;
+        }
+
+        alert('Sucesso: Escala guardada com sucesso!');
+      } catch (err) {
+        alert('Erro ao guardar: ' + err.message);
+      }
+    }
+
+    function gerarTextoEscalaDigitada() {
+      const mesNome = MESES[mesSelecionado - 1].toUpperCase();
+      let texto = `*ESCALA DE DIACONATO - ${mesNome} / ${anoSelecionado}*\n\n`;
+
+      if (diasCulto.sabados.length > 0) {
+        texto += `=====================\n🟦 *SÁBADOS*\n=====================\n`;
+        diasCulto.sabados.forEach(d => {
+          const abertura = dadosEscala[`${d.data}_abrir`] || '—';
+          const recolh = [0, 1, 2, 3].map(i => dadosEscala[`${d.data}_recolher_${i}`]).filter(Boolean).join(', ') || '—';
+          const cobrir = [0, 1].map(i => dadosEscala[`${d.data}_cobrir_${i}`]).filter(Boolean).join(', ') || '—';
+          const saida = [0, 1].map(i => dadosEscala[`${d.data}_saida_${i}`]).filter(Boolean).join(', ') || '—';
+
+          texto += `📅 *${d.rotulo}*\n• Abrir Igreja: ${abertura}\n• Recolhimento: ${recolh}\n• Cobrir Salva: ${cobrir}\n• Ordenação de Saída: ${saida}\n\n`;
+        });
+      }
+
+      if (diasCulto.domingos.length > 0) {
+        texto += `=====================\n🟩 *DOMINGOS*\n=====================\n`;
+        diasCulto.domingos.forEach(d => {
+          const abertura = dadosEscala[`${d.data}_abrir`] || '—';
+          const recolh = [0, 1].map(i => dadosEscala[`${d.data}_recolher_${i}`]).filter(Boolean).join(', ') || '—';
+          texto += `📅 *${d.rotulo}*\n• Abrir Igreja: ${abertura}\n• Recolhimento: ${recolh}\n\n`;
+        });
+      }
+
+      if (diasCulto.quartas.length > 0) {
+        texto += `=====================\n🟨 *QUARTAS-FEIRAS*\n=====================\n`;
+        diasCulto.quartas.forEach(d => {
+          const abertura = dadosEscala[`${d.data}_abrir`] || '—';
+          const recolh = [0, 1].map(i => dadosEscala[`${d.data}_recolher_${i}`]).filter(Boolean).join(', ') || '—';
+          texto += `📅 *${d.rotulo}*\n• Abrir Igreja: ${abertura}\n• Recolhimento: ${recolh}\n\n`;
+        });
+      }
+
+      return texto;
+    }
+
+    function copiarEscalaDigitadaWhatsApp() {
+      const texto = gerarTextoEscalaDigitada();
+      navigator.clipboard.writeText(texto).then(() => {
+        alert('Escala do mês copiada para o WhatsApp!');
+      });
+    }
+
+    function abrirModalVisualizarDigitado() {
+      document.getElementById('modalDigitadoTitulo').innerText = `Escala Digitada (${MESES[mesSelecionado - 1]}/${anoSelecionado})`;
+      document.getElementById('textoDigitadoPreview').value = gerarTextoEscalaDigitada();
+      document.getElementById('modalVisualizarDigitado').classList.remove('hidden');
+    }
+
+    function fecharModalVisualizarDigitado() {
+      document.getElementById('modalVisualizarDigitado').classList.add('hidden');
+    }
+
+    function renderizarTemplatesLembretes() {
+      const container = document.getElementById('listaTemplates');
+      container.innerHTML = '';
+
+      if (templates.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-4">Nenhum template encontrado.</p>`;
+        return;
+      }
+
+      templates.forEach(t => {
+        const card = document.createElement('div');
+        card.className = "bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2";
+        card.innerHTML = `
+          <div class="flex justify-between items-center">
+            <h4 class="text-xs font-bold text-primaria">${t.titulo}</h4>
+            <button type="button" onclick="copiarLembreteAutomatico('${t.id}')" class="px-3 py-1 bg-primaria text-white text-xs font-bold rounded-lg hover:opacity-90">
+              Copiar
+            </button>
+          </div>
+          <p class="text-xs text-slate-600 font-mono whitespace-pre-wrap bg-slate-50 p-2.5 rounded-lg border border-slate-100 max-h-32 overflow-y-auto">${t.corpo}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function copiarLembreteAutomatico(templateId) {
+      const template = templates.find(t => String(t.id) === String(templateId));
+      if (!template) return;
+
+      const hoje = new Date();
+      const isoHoje = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+
+      const obterProximoCulto = (lista) => {
+        if (!lista || lista.length === 0) return '';
+        const futuroOuHoje = lista.find(d => d.data >= isoHoje);
+        return futuroOuHoje ? futuroOuHoje.data : lista[lista.length - 1].data;
+      };
+
+      let dataRef = '';
+      if (template.id === 'sabado' || (template.titulo || '').toLowerCase().includes('sábado')) dataRef = obterProximoCulto(diasCulto.sabados);
+      else if (template.id === 'domingo' || (template.titulo || '').toLowerCase().includes('domingo')) dataRef = obterProximoCulto(diasCulto.domingos);
+      else if (template.id === 'quarta' || (template.titulo || '').toLowerCase().includes('quarta')) dataRef = obterProximoCulto(diasCulto.quartas);
+
+      const abertura = dadosEscala[`${dataRef}_abrir`] || 'A definir';
+      const recolh = [
+        dadosEscala[`${dataRef}_recolher_0`],
+        dadosEscala[`${dataRef}_recolher_1`],
+        dadosEscala[`${dataRef}_recolher_2`],
+        dadosEscala[`${dataRef}_recolher_3`]
+      ].filter(Boolean).map(n => `• ${n}`).join('\n') || 'A definir';
+
+      const cobrir = [
+        dadosEscala[`${dataRef}_cobrir_0`],
+        dadosEscala[`${dataRef}_cobrir_1`]
+      ].filter(Boolean).map(n => `• ${n}`).join('\n') || 'A definir';
+
+      const saida = [
+        dadosEscala[`${dataRef}_saida_0`],
+        dadosEscala[`${dataRef}_saida_1`]
+      ].filter(Boolean).map(n => `• ${n}`).join('\n') || 'Conforme alinhamento';
+
+      const diaObj = diasCulto.sabados.find(d => d.data === dataRef)
+                  || diasCulto.domingos.find(d => d.data === dataRef)
+                  || diasCulto.quartas.find(d => d.data === dataRef);
+
+      let corpoFinal = template.corpo
+        .replace('{DATA}', diaObj ? diaObj.rotulo : '')
+        .replace('{ABERTURA}', abertura)
+        .replace('{RECOLHIMENTO}', recolh)
+        .replace('{COBERTURA}', cobrir)
+        .replace('{SAIDA}', saida);
+
+      navigator.clipboard.writeText(corpoFinal).then(() => {
+        alert(`Lembrete copiado!`);
+      });
+    }
+
+    // GESTÃO DE EQUIPE (COM PROTEÇÃO)
+    function renderizarListaEquipe(lista = membros) {
+      const container = document.getElementById('listaMembrosCadastrados');
+      container.innerHTML = '';
+
+      if (lista.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Nenhum membro registado.</p>`;
+        return;
+      }
+
+      lista.forEach((m) => {
+        const item = document.createElement('div');
+        item.className = "bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-2 shadow-sm hover:border-slate-300 transition";
+        
+        item.innerHTML = `
+          <div class="flex-1">
+            <h4 class="text-xs font-bold text-slate-800">${m.nome}</h4>
+            <p class="text-[11px] text-slate-500">${m.cargo || m.tipo || 'Diácono'} • ${m.telefone || 'Sem contacto'}</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button type="button" class="btn-status px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${m.ativo ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-red-100 text-red-800 hover:bg-red-200'}">
+              ${m.ativo ? 'Ativo' : 'Inativo'}
+            </button>
+            <button type="button" class="btn-editar p-1.5 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition" title="Editar Oficial">
+              ✏️
+            </button>
+            <button type="button" class="btn-remover p-1.5 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition" title="Remover Oficial">
+              🗑️
+            </button>
+          </div>
+        `;
+
+        item.querySelector('.btn-status').onclick = () => acaoRestrita(() => alternarStatusMembro(m.id, m.ativo));
+        item.querySelector('.btn-editar').onclick = () => acaoRestrita(() => abrirModalEditarMembro(m.id));
+        item.querySelector('.btn-remover').onclick = () => acaoRestrita(() => removerMembro(m.id, m.nome));
+
+        container.appendChild(item);
+      });
+    }
+
+    function filtrarListaEquipe() {
+      const termo = document.getElementById('buscaMembrosInput').value.trim().toUpperCase();
+      const filtrados = membros.filter(m => m.nome.toUpperCase().includes(termo) || (m.cargo || '').toUpperCase().includes(termo));
+      renderizarListaEquipe(filtrados);
+    }
+
+    function abrirModalNovoMembro() {
+      document.getElementById('novoMembroNome').value = '';
+      document.getElementById('novoMembroTelefone').value = '';
+      document.getElementById('modalNovoMembro').classList.remove('hidden');
+    }
+    function fecharModalNovoMembro() {
+      document.getElementById('modalNovoMembro').classList.add('hidden');
+    }
+    async function salvarNovoMembroIndividual() {
+      const nome = document.getElementById('novoMembroNome').value.trim().toUpperCase();
+      const cargo = document.getElementById('novoMembroCargo').value;
+      const telefone = document.getElementById('novoMembroTelefone').value.trim();
+
+      if (!nome) return alert('Informe o nome do oficial.');
+
+      try {
+        const tipoValor = cargo === 'Diaconisa' ? 'diaconisa' : 'diacono';
+        const { error } = await clientSupabase.from('membros').insert([{
+          nome, cargo, tipo: tipoValor, telefone: telefone || null, ativo: true
+        }]);
+
+        if (error) throw error;
+        fecharModalNovoMembro();
+        await carregarDadosIniciais();
+      } catch (err) {
+        alert('Erro ao guardar membro: ' + err.message);
+      }
+    }
+
+    function abrirModalEditarMembro(id) {
+      const m = membros.find(item => item.id === id);
+      if (!m) return;
+
+      document.getElementById('editMembroId').value = m.id;
+      document.getElementById('editMembroNome').value = m.nome;
+      document.getElementById('editMembroCargo').value = m.cargo || 'Diácono';
+      document.getElementById('editMembroTelefone').value = m.telefone || '';
+      document.getElementById('modalEditarMembro').classList.remove('hidden');
+    }
+
+    function fecharModalEditarMembro() {
+      document.getElementById('modalEditarMembro').classList.add('hidden');
+    }
+
+    async function salvarEdicaoMembro() {
+      const id = document.getElementById('editMembroId').value;
+      const nome = document.getElementById('editMembroNome').value.trim().toUpperCase();
+      const cargo = document.getElementById('editMembroCargo').value;
+      const telefone = document.getElementById('editMembroTelefone').value.trim();
+
+      if (!nome) return alert('Informe o nome.');
+
+      try {
+        const tipoValor = cargo === 'Diaconisa' ? 'diaconisa' : 'diacono';
+        const { error } = await clientSupabase.from('membros').update({
+          nome,
+          cargo,
+          tipo: tipoValor,
+          telefone: telefone || null
+        }).eq('id', id);
+
+        if (error) throw error;
+
+        fecharModalEditarMembro();
+        await carregarDadosIniciais();
+        alert('Oficial atualizado com sucesso!');
+      } catch (err) {
+        alert('Erro ao editar: ' + err.message);
+      }
+    }
+
+    async function removerMembro(id, nome) {
+      if (!confirm(`Deseja realmente remover ${nome} da equipe?`)) return;
+
+      try {
+        const { error } = await clientSupabase.from('membros').delete().eq('id', id);
+        if (error) throw error;
+        await carregarDadosIniciais();
+      } catch (err) {
+        alert('Erro ao excluir membro: ' + err.message);
+      }
+    }
+
+    function abrirModalLote() {
+      document.getElementById('textoLoteNomes').value = '';
+      document.getElementById('modalLote').classList.remove('hidden');
+    }
+    function fecharModalLote() {
+      document.getElementById('modalLote').classList.add('hidden');
+    }
+    async function processarLoteMembros() {
+      const texto = document.getElementById('textoLoteNomes').value.trim();
+      const cargo = document.getElementById('cargoLote').value;
+
+      if (!texto) return alert('Cole a lista de nomes.');
+
+      const nomes = texto.split(/[\n,]+/).map(n => n.trim().toUpperCase()).filter(n => n.length > 1);
+      if (nomes.length === 0) return;
+
+      try {
+        const tipoValor = cargo === 'Diaconisa' ? 'diaconisa' : 'diacono';
+        const payload = nomes.map(nome => ({
+          nome, cargo, tipo: tipoValor, ativo: true
+        }));
+
+        const { error } = await clientSupabase.from('membros').upsert(payload, { onConflict: 'nome', ignoreDuplicates: true });
+        if (error) throw error;
+
+        fecharModalLote();
+        await carregarDadosIniciais();
+      } catch (err) {
+        alert('Erro no lote: ' + err.message);
+      }
+    }
+
+    async function alternarStatusMembro(id, statusAtual) {
+      try {
+        const { error } = await clientSupabase.from('membros').update({ ativo: !statusAtual }).eq('id', id);
+        if (error) throw error;
+        await carregarDadosIniciais();
+      } catch (err) {
+        alert('Erro: ' + err.message);
+      }
+    }
+
+    // GERADOR DO PDF OFICIAL (DISTRIBUIÇÃO HARMONIOSA A4)
+    function gerarPdfOficial() {
+      const mesNome = MESES[mesSelecionado - 1];
+      const anoNome = anoSelecionado;
+
+      const qtdSab = diasCulto.sabados.length;
+      const qtdDom = diasCulto.domingos.length;
+      const qtdQua = diasCulto.quartas.length;
+
+      const modoCompacto = (qtdSab >= 5 && qtdQua >= 5) || (qtdSab + qtdDom + qtdQua >= 14);
+
+      let html = `
+        <div style="width: 794px; min-height: 1120px; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; color: #1b1b1b; padding-left: 32px; padding-right: 32px; padding-top: ${URL_TOPO_IMG ? (modoCompacto ? '118px' : '124px') : '25px'}; padding-bottom: ${URL_RODAPE_IMG ? (modoCompacto ? '98px' : '110px') : '25px'}; background: #ffffff;">
+          
+          ${URL_TOPO_IMG ? `
+            <div style="position: fixed; left: 0; top: 0; width: 100%; height: 110px; z-index: 100;">
+              <img src="${URL_TOPO_IMG}" style="width: 100%; height: 100%; display: block; object-fit: cover;" />
+            </div>
+          ` : ''}
+
+          ${URL_RODAPE_IMG ? `
+            <div style="position: fixed; left: 0; bottom: 0; width: 100%; height: 90px; z-index: 100;">
+              <img src="${URL_RODAPE_IMG}" style="width: 100%; height: 100%; display: block; object-fit: cover;" />
+            </div>
+          ` : ''}
+
+          <div style="text-align: center; margin: ${modoCompacto ? '4px 0 8px 0' : '8px 0 14px 0'};">
+            <h1 style="margin: 0; font-size: ${modoCompacto ? '22px' : '24px'}; font-weight: 900; text-transform: uppercase; color: #1f3a57; letter-spacing: .6px;">ESCALA DE DIACONATO</h1>
+            <h2 style="margin: 4px 0 0 0; font-size: ${modoCompacto ? '20px' : '22px'}; font-weight: 900; color: #42576b; text-transform: capitalize;">${mesNome} de ${anoNome}</h2>
+          </div>
+      `;
+
+      // SÁBADOS
+      if (diasCulto.sabados.length > 0) {
+        html += `
+          <div style="font-size: ${modoCompacto ? '15px' : '16px'}; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; text-align: center; color: #ffffff; padding: ${modoCompacto ? '5px 0' : '6px 0'}; background: #0b4f7b; border-radius: 4px; margin: ${modoCompacto ? '8px 0 5px 0' : '12px 0 6px 0'}; -webkit-print-color-adjust: exact;">SÁBADOS</div>
+          <table style="width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: ${modoCompacto ? '8px' : '12px'};">
+            <thead>
+              <tr style="background: #e9f4f7; -webkit-print-color-adjust: exact;">
+                <th style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 3px' : '6px 4px'}; color: #1f3a57; font-size: 11px; font-weight: 900; text-transform: uppercase; width: 12%;">DIA</th>
+                <th colspan="4" style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 3px' : '6px 4px'}; color: #1f3a57; font-size: 11px; font-weight: 900; text-transform: uppercase;">DIÁCONOS E DIACONIZAS RECOLHIMENTO DÍZIMOS E OFERTAS</th>
+                <th style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 3px' : '6px 4px'}; color: #1f3a57; font-size: 11px; font-weight: 900; text-transform: uppercase; width: 18%;">COBRIR A SALVA</th>
+                <th style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 3px' : '6px 4px'}; color: #1f3a57; font-size: 11px; font-weight: 900; text-transform: uppercase; width: 16%;">RESP. ABRIR IGREJA</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${diasCulto.sabados.map(d => `
+                <tr>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '12px' : '13px'}; text-align: center; font-weight: 900;">${d.rotulo}</td>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '11.5px' : '12.5px'}; text-align: center; font-weight: 600; width: 13.5\%;">${dadosEscala[`${d.data}_recolher_0`] || ''}</td>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '11.5px' : '12.5px'}; text-align: center; font-weight: 600; width: 13.5\%;">${dadosEscala[`${d.data}_recolher_1`] || ''}</td>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '11.5px' : '12.5px'}; text-align: center; font-weight: 600; width: 13.5\%;">${dadosEscala[`${d.data}_recolher_2`] || ''}</td>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '11.5px' : '12.5px'}; text-align: center; font-weight: 600; width: 13.5\%;">${dadosEscala[`${d.data}_recolher_3`] || ''}</td>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '11px' : '12px'}; text-align: center; font-weight: 600;">
+                    <div style="line-height: 1.15;">
+                      <div>${dadosEscala[`${d.data}_cobrir_0`] || '<span style="color:#6b7785;">—</span>'}</div>
+                      <div>${dadosEscala[`${d.data}_cobrir_1`] || ''}</div>
+                    </div>
+                  </td>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '12px' : '13px'}; text-align: center; font-weight: 900;">
+                    ${dadosEscala[`${d.data}_abrir`] || '<span style="color:#6b7785;">—</span>'}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+
+      // DOMINGOS
+      if (diasCulto.domingos.length > 0) {
+        html += `
+          <div style="font-size: ${modoCompacto ? '15px' : '16px'}; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; text-align: center; color: #ffffff; padding: ${modoCompacto ? '5px 0' : '6px 0'}; background: #0b4f7b; border-radius: 4px; margin: ${modoCompacto ? '8px 0 5px 0' : '12px 0 6px 0'}; -webkit-print-color-adjust: exact;">DOMINGOS</div>
+          <table style="width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: ${modoCompacto ? '8px' : '12px'};">
+            <thead>
+              <tr style="background: #e9f4f7; -webkit-print-color-adjust: exact;">
+                <th style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 3px' : '6px 4px'}; color: #1f3a57; font-size: 11px; font-weight: 900; text-transform: uppercase; width: 14%;">DIA</th>
+                <th colspan="2" style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 3px' : '6px 4px'}; color: #1f3a57; font-size: 11px; font-weight: 900; text-transform: uppercase;">RECOLHIMENTO DÍZIMOS E OFERTAS</th>
+                <th style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 3px' : '6px 4px'}; color: #1f3a57; font-size: 11px; font-weight: 900; text-transform: uppercase; width: 28%;">RESP. ABRIR IGREJA</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${diasCulto.domingos.map(d => `
+                <tr>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '12px' : '13px'}; text-align: center; font-weight: 900;">${d.rotulo}</td>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '11.5px' : '12.5px'}; text-align: center; font-weight: 600; width: 29\%;">${dadosEscala[`${d.data}_recolher_0`] || ''}</td>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '11.5px' : '12.5px'}; text-align: center; font-weight: 600; width: 29\%;">${dadosEscala[`${d.data}_recolher_1`] || ''}</td>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '12px' : '13px'}; text-align: center; font-weight: 900;">
+                    ${dadosEscala[`${d.data}_abrir`] || '<span style="color:#6b7785;">—</span>'}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+
+      // QUARTAS
+      if (diasCulto.quartas.length > 0) {
+        html += `
+          <div style="font-size: ${modoCompacto ? '15px' : '16px'}; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; text-align: center; color: #ffffff; padding: ${modoCompacto ? '5px 0' : '6px 0'}; background: #0b4f7b; border-radius: 4px; margin: ${modoCompacto ? '8px 0 5px 0' : '12px 0 6px 0'}; -webkit-print-color-adjust: exact;">QUARTAS-FEIRAS</div>
+          <table style="width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 0;">
+            <thead>
+              <tr style="background: #e9f4f7; -webkit-print-color-adjust: exact;">
+                <th style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 3px' : '6px 4px'}; color: #1f3a57; font-size: 11px; font-weight: 900; text-transform: uppercase; width: 14%;">DIA</th>
+                <th colspan="2" style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 3px' : '6px 4px'}; color: #1f3a57; font-size: 11px; font-weight: 900; text-transform: uppercase;">RECOLHIMENTO DÍZIMOS E OFERTAS</th>
+                <th style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 3px' : '6px 4px'}; color: #1f3a57; font-size: 11px; font-weight: 900; text-transform: uppercase; width: 28%;">RESP. ABRIR IGREJA</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${diasCulto.quartas.map(d => `
+                <tr>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '12px' : '13px'}; text-align: center; font-weight: 900;">${d.rotulo}</td>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '11.5px' : '12.5px'}; text-align: center; font-weight: 600; width: 29\%;">${dadosEscala[`${d.data}_recolher_0`] || ''}</td>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '11.5px' : '12.5px'}; text-align: center; font-weight: 600; width: 29\%;">${dadosEscala[`${d.data}_recolher_1`] || ''}</td>
+                  <td style="border: 1px solid #8fb7c4; padding: ${modoCompacto ? '5px 2px' : '6.5px 3px'}; font-size: ${modoCompacto ? '12px' : '13px'}; text-align: center; font-weight: 900;">
+                    ${dadosEscala[`${d.data}_abrir`] || '<span style="color:#6b7785;">—</span>'}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+
+      html += `</div>`;
+
+      const area = document.getElementById('areaImpressaoPdf');
+      area.innerHTML = html;
+      area.classList.remove('hidden');
+
+      setTimeout(() => {
+        window.print();
+        area.classList.add('hidden');
+      }, 150);
+    }
+  </script>
+</body>
+</html>
